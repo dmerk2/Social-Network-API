@@ -12,7 +12,9 @@ router.get("/", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const singleUser = await User.findOne({ _id: req.params.userId });
+    const singleUser = await User.findOne({ _id: req.params.userId }).populate(
+      "thoughts"
+    );
     if (!singleUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }
@@ -33,7 +35,11 @@ router.post("/", async (req, res) => {
 
 router.put("/:userId", async (req, res) => {
   try {
-    const updateUser = await User.findOneAndUpdate({ _id: req.params.userId });
+    const updateUser = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      req.body,
+      { new: true }
+    );
     if (!updateUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }
@@ -45,7 +51,7 @@ router.put("/:userId", async (req, res) => {
 
 router.delete("/:userId", async (req, res) => {
   try {
-    const deleteUser = await User.findByIdAndDelete({ _id: req.params.userId });
+    const deleteUser = await User.findByIdAndDelete(req.params.userId);
     if (!deleteUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }
@@ -55,8 +61,11 @@ router.delete("/:userId", async (req, res) => {
   }
 });
 
-// BONUS:
-// Remove a user's associated thoughts when deleted.
+// BONUS: Remove a user's associated thoughts when deleted.
+// thoughtSchema.pre('remove', async function(next) {
+//   await Thought.deleteMany({ userId: this._id });
+//   next();
+// });
 
 // route /api/users/:userId/friends/:friendId
 
@@ -74,7 +83,9 @@ router.post("/:userId/friends/:friendId", async (req, res) => {
 
 router.delete("/:userId/friends/:friendId", async (req, res) => {
   try {
-    const deleteFriend = await User.findByIdAndDelete({ _id: req.params.friendId });
+    const deleteFriend = await User.findByIdAndDelete({
+      _id: req.params.friendId,
+    });
     if (!deleteFriend) {
       return res.status(400).json({ message: "No friend with that ID" });
     }
