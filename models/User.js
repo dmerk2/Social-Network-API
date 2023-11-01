@@ -16,13 +16,13 @@ const userSchema = new Schema(
     },
     thoughts: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Thought",
       },
     ],
     friends: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
@@ -34,6 +34,8 @@ const userSchema = new Schema(
     id: false,
   }
 );
+
+const User = model('user', userSchema)
 
 // Define the virtual field
 userSchema.virtual("friendCount").get(function () {

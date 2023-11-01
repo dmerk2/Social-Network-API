@@ -1,15 +1,15 @@
-const mongoose = require("mongoose");
+const { Schema } = require("mongoose");
 
-const reactionSchema = new mongoose.Schema(
+const reactionSchema = new Schema(
   {
     reactionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: () => new mongoose.Types.ObjectId(),
+      type: Schema.Types.ObjectId,
+      default: () => new Schema.Types.ObjectId(),
     },
     reactionBody: {
       type: String,
       required: true,
-      maxLength: 280,
+      maxlength: 280,
     },
     username: {
       type: String,
@@ -17,7 +17,8 @@ const reactionSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now,
+      default: Date.now(),
+      get: (date) => date.toLocaleString(),
     },
   },
   {
@@ -27,9 +28,5 @@ const reactionSchema = new mongoose.Schema(
     id: false,
   }
 );
-
-reactionSchema.path("createdAt").get(function (value) {
-  return new Date(value).toISOString();
-});
 
 module.exports = reactionSchema;
