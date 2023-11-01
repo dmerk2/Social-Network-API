@@ -49,25 +49,28 @@ router.put("/:userId", async (req, res) => {
   }
 });
 
+// Delete associated thoughts with the user
 router.delete("/:userId", async (req, res) => {
   try {
-    const deleteUser = await User.findByIdAndDelete(req.params.userId);
+    const deleteUser = await User.findById(req.params.userId);
     if (!deleteUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }
+
+    // Get the IDs of associated thoughts
+    const thoughtIds = deleteUser.thoughts;
+
+    // Delete associated thoughts
+    await Thought.deleteMany({ _id: { $in: thoughtIds } });
+
+    // Delete the user
+    await User.findByIdAndDelete(req.params.userId);
+
     return res.json(deleteUser);
   } catch (err) {
     res.status(500).json(err);
   }
 });
-
-// BONUS: Remove a user's associated thoughts when deleted.
-// thoughtSchema.pre('remove', async function(next) {
-//   await Thought.deleteMany({ userId: this._id });
-//   next();
-// });
-
-// route /api/users/:userId/friends/:friendId
 
 router.post("/:userId/friends/:friendId", async (req, res) => {
   try {
