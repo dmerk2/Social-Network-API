@@ -12,9 +12,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const singleUser = await User.findOne({ _id: req.params.userId }).populate(
-      "thoughts"
-    );
+    const singleUser = await User.findOne({ _id: req.params.userId });
     if (!singleUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }

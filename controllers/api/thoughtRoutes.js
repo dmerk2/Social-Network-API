@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const { Thought } = require("../../models");
+const { User, Thought } = require("../../models");
+const mongoose = require("mongoose");
 
 router.get("/", async (req, res) => {
   try {
@@ -25,6 +26,16 @@ router.get("/:thoughtId", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const newThought = await Thought.create(req.body);
+    const userId = req.body.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ message: "No user with that ID" });
+    }
+
+    user.thoughts.push(newThought._id);
+    await user.save();
+
     return res.json(newThought);
   } catch (err) {
     res.status(500).json(err);
@@ -65,8 +76,11 @@ router.post("/:thoughtId/reactions", async (req, res) => {
     if (!thought) {
       return res.status(400).json({ message: "No thought with that ID" });
     }
-
-    thought.reactions.push(req.body);
+    const newReactionId = new mongoose.Types.ObjectId();
+    thought.reactions.push({
+      reactionId: newReactionId,
+      ...req.body,
+    });
     const newReaction = await thought.save();
 
     return res.json(newReaction);
@@ -75,7 +89,7 @@ router.post("/:thoughtId/reactions", async (req, res) => {
   }
 });
 
-router.delete("/:thoughtId/reactions", async (req, res) => {
+router.delete("/:thoughtId/reactions/:reactionId", async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.thoughtId);
     if (!thought) {
