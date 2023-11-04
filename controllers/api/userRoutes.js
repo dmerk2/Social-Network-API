@@ -84,13 +84,20 @@ router.post("/:userId/friends/:friendId", async (req, res) => {
 
 router.delete("/:userId/friends/:friendId", async (req, res) => {
   try {
-    const deleteFriend = await User.findByIdAndDelete({
-      _id: req.params.friendId,
-    });
-    if (!deleteFriend) {
-      return res.status(400).json({ message: "No friend with that ID" });
+    const { userId, friendId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ message: "No user with that ID" });
     }
-    return res.json(deleteFriend);
+
+    // Remove friend from the friends array
+    user.friends = user.friends.filter((id) => id.toString() !== friendId);
+
+    await user.save();
+
+    return res.json({ message: "Friend deleted successfully" });
   } catch (err) {
     res.status(500).json(err);
   }
