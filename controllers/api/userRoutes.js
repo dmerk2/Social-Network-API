@@ -12,13 +12,22 @@ router.get("/", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const singleUser = await User.findOne({ _id: req.params.userId });
+    const singleUser = await User.findById({ _id: req.params.userId })
+      .populate("thoughts")
+      .populate("friends");
     if (!singleUser) {
       return res.status(400).json({ message: "No user with that ID" });
     }
     return res.json(singleUser);
   } catch (err) {
-    res.status(500).json(err);
+    if (err.name === "CastError") {
+      return res.status(400).json({ message: "Invalid user ID" });
+    } else if (err.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation error" });
+    } else {
+      console.error(err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 });
 
